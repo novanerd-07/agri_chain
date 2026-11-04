@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Shopping Cart - AgriChain</title>
+
+    <link rel="stylesheet"
+          href="css/style.css">
+
+</head>
+
+
+<body>
+
+
+    <!-- =========================
+         NAVBAR
+    ========================== -->
+
+    <nav class="navbar">
+
+        <div class="logo">
+            🌾 AgriChain
+        </div>
+
+        <div class="nav-links">
+
+            <a href="index.html">
+                Home
+            </a>
+
+            <a href="buyer.html">
+                Products
+            </a>
+
+            <a href="#"
+               onclick="logout()">
+                Logout
+            </a>
+
+        </div>
+
+    </nav>
+
+
+
+    <!-- =========================
+         CART SECTION
+    ========================== -->
+
+    <section class="dashboard-section">
+
+        <div class="dashboard-container">
+
+
+            <h1>
+                🛒 Shopping Cart
+            </h1>
+
+
+            <p class="dashboard-subtitle">
+                Review the agricultural products you selected.
+            </p>
+
+
+
+            <!-- CART PRODUCTS -->
+
+            <div class="dashboard-card">
+
+                <h2>
+                    Your Cart
+                </h2>
+
+
+                <div id="cartContainer">
+
+                    <p>
+                        Loading cart...
+                    </p>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- ORDER SUMMARY -->
+
+            <div class="dashboard-card"
+                 style="margin-top:25px;">
+
+                <h2>
+                    Order Summary
+                </h2>
+
+
+                <h3 id="totalAmount"
+                    style="font-size:24px; color:#2e7d32;">
+
+                    Total: ₹0
+
+                </h3>
+
+
+                <button
+                    class="dashboard-btn"
+                    onclick="placeOrder()">
+
+                    Place Order
+
+                </button>
+
+
+                <button
+                    class="cancel-btn"
+                    onclick="continueShopping()">
+
+                    Continue Shopping
+
+                </button>
+
+            </div>
+
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =========================
+         JAVASCRIPT
+    ========================== -->
+
+    <script>
+
+
+        // =====================================
+        // LOAD CART
+        // =====================================
+
+        function loadCart() {
+
+            const cartContainer =
+                document.getElementById(
+                    "cartContainer"
+                );
+
+
+            let cart =
+                JSON.parse(
+                    localStorage.getItem("cart")
+                ) || [];
+
+
+            // Check if cart is empty
+
+            if (cart.length === 0) {
+
+                cartContainer.innerHTML = `
+
+                    <p>
+                        Your cart is empty.
+                    </p>
+
+                    <button
+                        class="dashboard-btn"
+                        onclick="continueShopping()">
+
+                        Browse Products
+
+                    </button>
+
+                `;
+
+
+                document.getElementById(
+                    "totalAmount"
+                ).textContent =
+                    "Total: ₹0";
+
+
+                return;
+
+            }
+
+
+
+            // Clear existing content
+
+            cartContainer.innerHTML =
+                "";
+
+
+            let total = 0;
+
+
+
+            // =====================================
+            // DISPLAY CART PRODUCTS
+            // =====================================
+
+            cart.forEach(
+                (product, index) => {
+
+
+                    total +=
+                        Number(product.price);
+
+
+                    const cartItem =
+                        document.createElement(
+                            "div"
+                        );
+
+
+                    cartItem.style.border =
+                        "1px solid #ddd";
+
+                    cartItem.style.borderRadius =
+                        "10px";
+
+                    cartItem.style.padding =
+                        "20px";
+
+                    cartItem.style.marginBottom =
+                        "15px";
+
+                    cartItem.style.background =
+                        "#ffffff";
+
+
+
+                    cartItem.innerHTML = `
+
+                        <h3
+                            style="color:#2e7d32;">
+                            ${product.productName}
+                        </h3>
+
+
+                        <p>
+
+                            <strong>
+                                Category:
+                            </strong>
+
+                            ${product.category}
+
+                        </p>
+
+
+                        <p>
+
+                            <strong>
+                                Quantity:
+                            </strong>
+
+                            ${product.quantity}
+                            ${product.unit}
+
+                        </p>
+
+
+                        <p>
+
+                            <strong>
+                                Price:
+                            </strong>
+
+                            ₹${product.price}
+
+                        </p>
+
+
+                        <p>
+
+                            <strong>
+                                Farmer:
+                            </strong>
+
+                            ${product.farmerName}
+
+                        </p>
+
+
+                        <button
+                            class="cancel-btn"
+                            onclick="removeFromCart(${index})">
+
+                            Remove
+
+                        </button>
+
+                    `;
+
+
+                    cartContainer.appendChild(
+                        cartItem
+                    );
+
+                }
+            );
+
+
+
+            // Display total
+
+            document.getElementById(
+                "totalAmount"
+            ).textContent =
+                "Total: ₹" + total;
+
+        }
+
+
+
+        // =====================================
+        // REMOVE FROM CART
+        // =====================================
+
+        function removeFromCart(index) {
+
+            let cart =
+                JSON.parse(
+                    localStorage.getItem("cart")
+                ) || [];
+
+
+            cart.splice(
+                index,
+                1
+            );
+
+
+            localStorage.setItem(
+                "cart",
+                JSON.stringify(cart)
+            );
+
+
+            loadCart();
+
+        }
+
+
+
+        // =====================================
+        // CONTINUE SHOPPING
+        // =====================================
+
+        function continueShopping() {
+
+            window.location.href =
+                "buyer.html";
+
+        }
+
+
+
+        // =====================================
+        // PLACE ORDER
+        // =====================================
+
+        async function placeOrder() {
+
+
+            // Get logged-in buyer
+
+            const userData =
+                localStorage.getItem("user");
+
+
+            if (!userData) {
+
+                alert(
+                    "Please login first."
+                );
+
+
+                window.location.href =
+                    "login.html";
+
+
+                return;
+
+            }
+
+
+            const user =
+                JSON.parse(userData);
+
+
+
+            // Get cart
+
+            const cart =
+                JSON.parse(
+                    localStorage.getItem("cart")
+                ) || [];
+
+
+            // Check cart
+
+            if (cart.length === 0) {
+
+                alert(
+                    "Your cart is empty."
+                );
+
+
+                return;
+
+            }
+
+
+
+            // =====================================
+            // CALCULATE TOTAL
+            // =====================================
+
+            let totalAmount = 0;
+
+
+            cart.forEach(
+                product => {
+
+                    totalAmount +=
+                        Number(product.price);
+
+                }
+            );
+
+
+
+            // =====================================
+            // PREPARE PRODUCTS
+            // =====================================
+
+            const products =
+                cart.map(
+                    product => ({
+
+                        productId:
+                            product._id,
+
+                        productName:
+                            product.productName,
+
+                        farmerId:
+                            product.farmerId,
+
+                        farmerName:
+                            product.farmerName,
+
+                        quantity:
+                            Number(
+                                product.quantity
+                            ),
+
+                        unit:
+                            product.unit,
+
+                        price:
+                            Number(
+                                product.price
+                            )
+
+                    })
+                );
+
+
+
+            try {
+
+
+                // =================================
+                // SEND ORDER TO BACKEND
+                // =================================
+
+                const response =
+                    await fetch(
+                        "http://localhost:5000/api/orders/place",
+                        {
+
+                            method: "POST",
+
+                            headers: {
+
+                                "Content-Type":
+                                    "application/json"
+
+                            },
+
+                            body:
+                                JSON.stringify({
+
+                                    buyerId:
+                                        user.id,
+
+                                    buyerName:
+                                        user.name,
+
+                                    products:
+                                        products,
+
+                                    totalAmount:
+                                        totalAmount
+
+                                })
+
+                        }
+                    );
+
+
+
+                // Convert response
+
+                const data =
+                    await response.json();
+
+
+
+                // Check response
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        data.message ||
+                        "Unable to place order."
+                    );
+
+                }
+
+
+
+                // =================================
+                // SUCCESS
+                // =================================
+
+                alert(
+                    "Order placed successfully!\n\n" +
+                    "Order ID: " +
+                    data.order._id
+                );
+
+
+
+                // Clear cart
+
+                localStorage.removeItem(
+                    "cart"
+                );
+
+
+
+                // Reload cart
+
+                loadCart();
+
+
+            }
+            catch (error) {
+
+
+                console.error(
+                    "Place Order Error:",
+                    error
+                );
+
+
+                alert(
+                    "Unable to place order.\n\n" +
+                    error.message
+                );
+
+            }
+
+        }
+
+
+
+        // =====================================
+        // LOGOUT
+        // =====================================
+
+        function logout() {
+
+
+            localStorage.removeItem(
+                "user"
+            );
+
+
+            localStorage.removeItem(
+                "cart"
+            );
+
+
+            window.location.href =
+                "login.html";
+
+        }
+
+
+
+        // =====================================
+        // LOAD CART
+        // =====================================
+
+        loadCart();
+
+
+    </script>
+
+
+</body>
+
+</html>
